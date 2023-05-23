@@ -1,5 +1,4 @@
----professor table
-
+-- professor table
 INSERT INTO professor (id, name, department) VALUES
 	('801', '이민수', '컴퓨터공학과'),
 	('802', '이형준', '컴퓨터공학과'),
@@ -22,10 +21,7 @@ INSERT INTO professor (id, name, department) VALUES
 	('819', '최병주', '전기전자공학과'),
 	('820', '양숙희', '전기전자공학과');
 
-
---- course table
-
-
+-- course table
 INSERT INTO course (id, title, department, prof_id) VALUES
 	('CS_101', '데이터베이스', '컴퓨터공학과', '801'),
 	('CS_102', '데이터베이스', '컴퓨터공학과', '802'),
@@ -48,10 +44,7 @@ INSERT INTO course (id, title, department, prof_id) VALUES
 	('EE_103', '전자공학종합설계', '전기전자공학과', '819'),
 	('EE_104', '전자회로실험', '전기전자공학과', '820');
 
-
------student table
-
-
+-- student table
 INSERT INTO student (id, name, department) VALUES
 	('1942051', '조유담', '컴퓨터공학과'),
 	('2176255', '이서연', '컴퓨터공학과'),
@@ -74,10 +67,7 @@ INSERT INTO student (id, name, department) VALUES
 	('2189238', '김채원', '사회과교육과'),
 	('1983743', '홍은채', '사회과교육과');
 
-
------rating table
-
-
+-- rating table
 INSERT INTO rating (course_id, prof_id, student_id, point, contents) VALUES
 	('CS_101', '801', '1942051', '5', '영어도 잘하시고, 설명을 세세하게 잘해주십니다. 그리고 질문하면 친절하게 답변해주셔요'),
 	('CS_102', '802', '2176255', '4', '교수님은 친절하신데 시험은 안 친절해요.. 광광'),
@@ -99,4 +89,3 @@ INSERT INTO rating (course_id, prof_id, student_id, point, contents) VALUES
 	('EE_102', '818', '1837321', '4', '열심히 했는데 A0 ㅠㅠ'),
 	('CS_101', '801', '2176255', '5', '교수님 강의력 넘 좋으세요'),
 	('CS_101', '801', '1916011', '4', '교수님 실버니안 패밀리 닮으셨어요');
-
