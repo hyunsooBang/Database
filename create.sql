@@ -20,6 +20,7 @@ CREATE TABLE student (
   department varchar(20),
   PRIMARY KEY (id)
 );
+
 CREATE TABLE rating (
   rating_id int,
   course_id varchar(6),
