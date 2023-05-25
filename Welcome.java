@@ -21,6 +21,8 @@ public class Welcome {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 
 			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "1234");
+			//conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project", "root", "tjdwns246246");
+
 			System.out.println("MySQL DB 연결 성공");
 
 			// SQL 연결
