@@ -1,9 +1,9 @@
 public class User extends Person {
-	public User(String name, int number) {
+	public User(String name, String number) {
 		super(name, number);
 	}
 
-	public User(String username, int number, String address) {
+	public User(String username, String number, String address) {
 		super(username, number, address);
 	}
 }
