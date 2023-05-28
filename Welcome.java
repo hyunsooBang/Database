@@ -323,7 +323,7 @@ public class Welcome {
 	        while (courseRs.next()) {
 	            String courseId = courseRs.getString("id");
 	            String courseTitle = courseRs.getString("title");
-	            int professor = courseRs.getInt("prof_id");
+	            String professor = courseRs.getString("prof_id");
 	            System.out.println("강의 ID: " + courseId + ", 강의명: " + courseTitle + ", 교수: " + professor);
 	        }
 
