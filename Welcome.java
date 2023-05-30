@@ -48,9 +48,8 @@ public class Welcome {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 
-			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "1234");
-			// conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project",
-			// "root", "tjdwns246246");
+			//conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "1234");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project","root", "tjdwns246246");
 			// jdbc:mysql://localhost:3306/create.sql 및 insert.sql로 테이블 생성한 database name",
 			// "root", "root비밀번호"
 			System.out.println("MySQL DB 연결 성공");
@@ -262,7 +261,7 @@ public class Welcome {
 		String courseContents = input.nextLine();
 		System.out.println("----------------------------");
 		try {
-			// 기존에 생성된 'V1' 뷰가 있으면 삭제
+			// 기존에 생성된 'V' 뷰가 있으면 삭제
 			String dropViewSql = "DROP VIEW IF EXISTS V";
 			stmt.executeUpdate(dropViewSql);
 			// 임시로 뷰를 생성하여 검색 조건에 해당하는 데이터를 조회
@@ -321,10 +320,11 @@ public class Welcome {
 		// rating, course, professor 테이블을 조인하고, 특정 교수 이름과 강의 제목에 해당하는 레코드들의 평균 평점을 조회
 		try {
 			String sql = "SELECT AVG(point) AS average_rating " +
-					"FROM rating r " +
-					"JOIN course c ON r.course_id = c.id " +
-					"JOIN professor p ON c.prof_id = p.id " +
-					"WHERE p.name = '" + professorName + "' AND c.title = '" + courseTitle + "'";
+            "FROM rating r " +
+            "JOIN course c ON r.course_id = c.id " +
+            "JOIN professor p ON c.prof_id = p.id " +
+            "WHERE p.name = '" + professorName + "' AND c.title = '" + courseTitle + "'" +
+            "GROUP BY c.title, p.name";
 
 			ResultSet result = stmt.executeQuery(sql);
 
