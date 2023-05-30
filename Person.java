@@ -1,14 +1,14 @@
 public class Person {
 	private String name;
-	private int number;
+	private String number;
 	private String address;
 
-	public Person(String name, int number) {
+	public Person(String name, String number) {
 		this.name = name;
 		this.number = number;
 	}
 
-	public Person(String name, int number, String address) {
+	public Person(String name, String number, String address) {
 		this.name = name;
 		this.number = number;
 		this.address = address;
@@ -22,11 +22,11 @@ public class Person {
 		this.name = name;
 	}
 
-	public int getNumber() {
+	public String getNumber() {
 		return number;
 	}
 
-	public void setNumber(int number) {
+	public void setNumber(String number) {
 		this.number = number;
 	}
 
