@@ -50,8 +50,7 @@ public class Welcome {
 
 			//conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "1234");
 			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project","root", "tjdwns246246");
-			// jdbc:mysql://localhost:3306/create.sql 및 insert.sql로 테이블 생성한 database name",
-			// "root", "root비밀번호"
+			// jdbc:mysql://localhost:3306/create.sql 및 insert.sql로 테이블 생성한 database name", "root", "root비밀번호"
 			System.out.println("MySQL DB 연결 성공");
 
 			// SQL 연결
