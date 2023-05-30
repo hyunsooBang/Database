@@ -403,10 +403,11 @@ public class Welcome {
 					System.out.println("강의평점은 1점에서 5점 사이만 입력할 수 있습니다.");
 					return;
 				}
-
+				input.nextLine();
 				System.out.print("새로운 강의평 내용: ");
-				String newContents = input.next();
-
+				
+				String newContents = input.nextLine();
+				
 				// 유저에게 입력받은 새로운 평점과 내용으로 강의평 업데이트
 				String updateSql = "UPDATE rating " +
 						"SET contents = '" + newContents + "', point = " + newPoint +
@@ -461,7 +462,7 @@ public class Welcome {
 			contents = contents.replace("'", "''");
 
 			// 유저 정보 기반으로 입력받은 강의 ID, 평점, 내용을 rating 테이블에 삽입
-			// 유저 정보 기반으로 입력받은 강의 ID, 평점, 내용을 rating 테이블에 삽입
+			
 			sql = "INSERT INTO rating (course_id, prof_id, student_id, point, contents) " +
 			"SELECT '" + courseId + "', c.prof_id, s.id, " + point + ", '" + contents + "' " +
 			"FROM course c, student s " +
