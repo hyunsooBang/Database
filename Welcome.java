@@ -14,10 +14,9 @@ class User {
 
 	// 유저 생성
 	public User(String name, String number) {
-		this.name = name;
-		this.number = number;
+		this.name = name; // 유저 이름
+		this.number = number; // 유저 학번
 	}
-
 	public String getName() {
 		return name;
 	}
@@ -37,20 +36,23 @@ class User {
 
 public class Welcome {
 
-	static User mUser;
-	static List<User> userList = new ArrayList<>();
-	static ResultSet stuRs;
-	static Statement stmt;
-	static Connection conn;
+	static User mUser;  // 현재 로그인한 유저
+	static List<User> userList = new ArrayList<>();  // 유저 리스트
+	static ResultSet stuRs;  // 학생 정보 결과셋
+	static Statement stmt;  // SQL 문 실행을 위한 Statement 객체
+	static Connection conn;  // 데이터베이스 연결 객체
 
 	public static void main(String[] args) {
 
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 
+			// MySQL 데이터베이스에 연결
+
 			//conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "1234");
 			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project","root", "tjdwns246246");
-			// jdbc:mysql://localhost:3306/create.sql 및 insert.sql로 테이블 생성한 database name", "root", "root비밀번호"
+			
+			
 			System.out.println("MySQL DB 연결 성공");
 
 			// SQL 연결
@@ -62,8 +64,7 @@ public class Welcome {
 			while (stuRs.next()) {
 				String id = stuRs.getString("id");
 				String name = stuRs.getString("name");
-				// String depart = stuRs.getString("department");
-				// System.out.println(id + " , " + name + " , " + depart);
+	
 
 				// 데이터베이스에 저장된 student id와 name을 유저 리스트에 저장
 				userList.add(new User(name, id));
@@ -114,6 +115,7 @@ public class Welcome {
 			System.out.println("***********************************************");
 			System.out.println("\t" + greeting);
 			System.out.println("\t" + tagline);
+			System.out.println("\tLogged in as: " + mUser.getName());
 
 			menuIntroduction();
 
@@ -121,13 +123,13 @@ public class Welcome {
 			int n = input.nextInt();
 
 			if (n < 1 || n > 6) {
-				System.out.println("1부터 6까지의 숫자를 입력하세요.");
+				System.out.println("1부터 5까지의 숫자를 입력하세요.");
 			} else {
 				if (mUser != null) {
 					switch (n) {
 						case 1:
 							// 강의평 삽입 함수
-							insertEIE();
+							insertECE();
 							break;
 						case 2:
 							// 강의평 검색 함수
@@ -222,6 +224,7 @@ public class Welcome {
 					"WHERE c.title LIKE '%" + courseName + "%' AND p.name LIKE '%" + professorName + "%'";
 
 			stmt.executeUpdate(createViewSql);
+			
 			// 뷰에서 데이터를 선택하여 출력
 			String selectSql = "SELECT * FROM V";
 			ResultSet result = stmt.executeQuery(selectSql);
@@ -260,12 +263,15 @@ public class Welcome {
 		String courseContents = input.nextLine();
 		System.out.println("----------------------------");
 		try {
+
 			// 기존에 생성된 'V' 뷰가 있으면 삭제
 			String dropViewSql = "DROP VIEW IF EXISTS V";
 			stmt.executeUpdate(dropViewSql);
+
 			// 임시로 뷰를 생성하여 검색 조건에 해당하는 데이터를 조회
 			// rating, course, professor 테이블을 조인하고, r.contents 필드에서 courseContents 변수에 포함된
 			// 내용을 포함하는 레코드를 선택하여 임시 뷰(V)를 생성
+			
 			String sql = "CREATE VIEW V AS " +
 					"SELECT c.title, c.id AS course_id, p.name AS professor_name, r.contents, r.point, r.student_id " +
 					"FROM rating r " +
@@ -329,9 +335,7 @@ public class Welcome {
 
 			if (result.next()) {
 				double averageRating = result.getDouble("average_rating");
-				// System.out.println("교수명: " + professorName);
-				// System.out.println("과목명: " + courseTitle);
-				System.out.printf("평균 강의평: %.2f%n", averageRating);
+				System.out.printf("평균 강의평점: %.2f%n", averageRating);
 			} else {
 				System.out.println("일치하는 강의평이 없습니다.");
 			}
@@ -425,7 +429,7 @@ public class Welcome {
 	}
 
 	// 새로운 강의평 추가 함수
-	public static void insertEIE() {
+	public static void insertECE() {
 		try {
 			// 전체 강의목록 출력
 			System.out.println("<< 강의 목록 >>");
@@ -457,12 +461,13 @@ public class Welcome {
 			contents = contents.replace("'", "''");
 
 			// 유저 정보 기반으로 입력받은 강의 ID, 평점, 내용을 rating 테이블에 삽입
-			sql = "INSERT INTO rating (rating_id, course_id, prof_id, student_id, point, contents) " +
-					"SELECT MAX(rating_id) + 1, '" + courseId + "', c.prof_id, s.id, " + point + ", '" + contents + "' "
-					+
-					"FROM course c, student s, rating r " +
-					"WHERE s.name = '" + mUser.getName() + "' AND s.id = " + mUser.getNumber() +
-					" AND c.id = '" + courseId + "'";
+			// 유저 정보 기반으로 입력받은 강의 ID, 평점, 내용을 rating 테이블에 삽입
+			sql = "INSERT INTO rating (course_id, prof_id, student_id, point, contents) " +
+			"SELECT '" + courseId + "', c.prof_id, s.id, " + point + ", '" + contents + "' " +
+			"FROM course c, student s " +
+			"WHERE s.name = '" + mUser.getName() + "' AND s.id = " + mUser.getNumber() +
+			" AND c.id = '" + courseId + "'";
+
 			stmt.executeUpdate(sql);
 
 			System.out.println("\n강의평이 성공적으로 추가되었습니다.");
@@ -479,8 +484,7 @@ public class Welcome {
 			String studentName = mUser.getName();
 			try {
 				// 작성한 전체 강의평 보여주기
-				String selectSql = "SELECT r.rating_id, c.title AS course_title, p.name AS professor_name, r.point, r.contents "
-						+
+				String selectSql = "SELECT r.rating_id, c.title AS course_title, p.name AS professor_name, r.point, r.contents "+
 						"FROM rating r " +
 						"JOIN course c ON r.course_id = c.id " +
 						"JOIN professor p ON c.prof_id = p.id " +
