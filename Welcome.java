@@ -34,7 +34,7 @@ public class Welcome {
 				String id = stuRs.getString("id");
 				String name = stuRs.getString("name");
 				String depart = stuRs.getString("department");
-				System.out.println(id + " ,  " + name + " , " + depart);
+				//System.out.println(id + " ,  " + name + " , " + depart);
 
 				// id와 name을 리스트에 저장
 				userList.add(new User(name, id));
@@ -168,6 +168,7 @@ public class Welcome {
 		}
 	}
 	public static void searchCourse() {
+
 		Scanner input = new Scanner(System.in);
 		System.out.print("검색할 강의명을 입력하세요: ");
 		String courseName = input.nextLine();
@@ -176,6 +177,8 @@ public class Welcome {
 		System.out.println("----------------------------");
 	
 		try {
+			
+			
 			String createViewSql = "CREATE VIEW V AS " +
 					"SELECT c.title, c.id AS course_id, p.name AS professor_name, r.student_id, r.contents, r.point " +
 					"FROM rating r " +
@@ -197,7 +200,7 @@ public class Welcome {
 				double ratingPoint = result.getDouble("point");
 				System.out.println("강의 ID: " + courseId);
 				System.out.println("강의명: " + title);
-				System.out.println("교수님 이름: " + professorName);
+				System.out.println("교수 이름: " + professorName);
 				System.out.println("학생 ID: " + studentId);
 				System.out.println("평점: " + ratingPoint);
 				System.out.println("강의평 내용: " + contents);
@@ -220,13 +223,17 @@ public class Welcome {
 		String courseContents = input.nextLine();
 		System.out.println("----------------------------");
 		try {
+			//기존에 생성된 'V1' 뷰가 있으면 삭제
+			String dropViewSql = "DROP VIEW IF EXISTS V";
+			stmt.executeUpdate(dropViewSql);
+
 			String sql = "CREATE VIEW V AS " +
-					"SELECT c.title, c.id AS course_id, p.name AS professor_name, r.contents " +
-					"FROM rating r " +
-					"JOIN course c ON r.course_id = c.id " +
-					"JOIN professor p ON c.prof_id = p.id " +
-					"WHERE r.contents LIKE '%" + courseContents + "%'";
-	
+			"SELECT c.title, c.id AS course_id, p.name AS professor_name, r.contents, r.point, r.student_id " +
+			"FROM rating r " +
+			"JOIN course c ON r.course_id = c.id " +
+			"JOIN professor p ON c.prof_id = p.id " +
+			"WHERE r.contents LIKE '%" + courseContents + "%'";
+
 			stmt.executeUpdate(sql);
 	
 			sql = "SELECT * FROM V";
@@ -237,9 +244,16 @@ public class Welcome {
 				String courseId = result.getString("course_id");
 				String professorName = result.getString("professor_name");
 				String contents = result.getString("contents");
+				String studentId = result.getString("student_id");
+				double ratingPoint = result.getDouble("point");
+
+			
 				System.out.println("강의 ID: " + courseId);
 				System.out.println("강의명: " + title);
-				System.out.println("교수님 이름: " + professorName);
+				System.out.println("교수 이름: " + professorName);
+
+				System.out.println("학생 ID: " + studentId);
+				System.out.println("평점: " + ratingPoint);
 				System.out.println("강의평 내용: " + contents);
 				System.out.println("----------------------------");
 			}
@@ -256,10 +270,11 @@ public class Welcome {
 	
 	public static void searchAverageRating() {
 		Scanner input = new Scanner(System.in);
-		System.out.print("교수명을 입력하세요: ");
-		String professorName = input.nextLine();
+		
 		System.out.print("과목명을 입력하세요: ");
 		String courseTitle = input.nextLine();
+		System.out.print("교수명을 입력하세요: ");
+		String professorName = input.nextLine();
 		System.out.println("----------------------------");
 	
 		try {
@@ -275,7 +290,7 @@ public class Welcome {
 				double averageRating = result.getDouble("average_rating");
 				// System.out.println("교수명: " + professorName);
 				// System.out.println("과목명: " + courseTitle);
-				System.out.println("평균 강의평: " + averageRating);
+				System.out.printf("평균 강의평: %.2f%n", averageRating);
 			} else {
 				System.out.println("일치하는 강의평이 없습니다.");
 			}
@@ -286,73 +301,75 @@ public class Welcome {
 			System.out.println("검색 중 오류 발생: " + e.getMessage());
 		}
 	}
-	
 	public static void modifyECE() {
 		if (mUser != null) {
 			String studentId = mUser.getNumber();
 			String studentName = mUser.getName();
-			
+	
 			System.out.println("\n다음은 "+ studentName + "님이 남기신 강의평 목록입니다.\n");
-
+	
 			try {
-				String selectSql = "SELECT r.rating_id, r.contents, r.point, c.title " +
-						"FROM rating r " +
-						"JOIN course c ON r.course_id = c.id " +
-						"WHERE r.student_id = '" + studentId + "'";
-
+				String selectSql = "SELECT r.rating_id, r.contents, r.point, c.title, p.name AS professor_name " +
+					"FROM rating r " +
+					"JOIN course c ON r.course_id = c.id " +
+					"JOIN professor p ON c.prof_id = p.id " +
+					"WHERE r.student_id = '" + studentId + "'";
+	
 				ResultSet result = stmt.executeQuery(selectSql);
-
+	
 				boolean hasRating = false;
-
+	
 				while (result.next()) {
 					hasRating = true;
 					int ratingId = result.getInt("rating_id");
 					String contents = result.getString("contents");
 					double point = result.getDouble("point");
 					String courseTitle = result.getString("title");
-
+					String professorName = result.getString("professor_name");
+	
 					System.out.println("강의평 ID: " + ratingId);
-					System.out.println("강의 제목: " + courseTitle);
-					System.out.println("강의평 내용: " + contents);
+					System.out.println("강의명: " + courseTitle);
+					System.out.println("교수 이름: " + professorName);
 					System.out.println("평점: " + point);
+					System.out.println("강의평 내용: " + contents);
 					System.out.println("-----------------------------");
 				}
-
+	
 				if (!hasRating) {
 					System.out.println("강의평가가 없습니다.");
 					return;
 				}
-
+	
 				System.out.println("강의평을 수정할 ID와 새로운 강의평 내용, 평점을 입력하세요.");
-
+	
 				Scanner input = new Scanner(System.in);
 				System.out.print("강의평 ID: ");
 				int ratingId = input.nextInt();
 				input.nextLine(); // 개행 문자 제거
-
-				System.out.print("새로운 강의평 내용: ");
-				String newContents = input.nextLine();
-
+	
 				System.out.print("새로운 평점: ");
 				double newPoint = input.nextDouble();
-
+	
 				if (newPoint < 1 || newPoint > 5) {
 					System.out.println("강의평점은 1점에서 5점 사이만 입력할 수 있습니다.");
 					return;
 				}
-
+	
+				System.out.print("새로운 강의평 내용: ");
+				String newContents = input.next();
+				
 				String updateSql = "UPDATE rating " +
-						"SET contents = '" + newContents + "', point = " + newPoint +
-						" WHERE rating_id = " + ratingId + " AND student_id = '" + studentId + "'";
-
+					"SET contents = '" + newContents + "', point = " + newPoint +
+					" WHERE rating_id = " + ratingId + " AND student_id = '" + studentId + "'";
+	
 				int rowsAffected = stmt.executeUpdate(updateSql);
-
+	
 				if (rowsAffected > 0) {
 					System.out.println("강의평 수정이 완료되었습니다.");
 				} else {
 					System.out.println("일치하는 강의평 ID가 없습니다.");
 				}
-
+	
 			} catch (SQLException e) {
 				System.out.println("강의평 수정 중 오류 발생: " + e.getMessage());
 			}
@@ -360,6 +377,7 @@ public class Welcome {
 			System.out.println("유저가 존재하지 않습니다.");
 		}
 	}
+	
 	public static void insertEIE() {
 		try {
 			// Display the course list
@@ -383,11 +401,11 @@ public class Welcome {
 			System.out.print("평가하고 싶은 강의 ID를 입력하세요: ");
 			String courseId = input.nextLine();
 	
-			System.out.print("강의 평가 점수를 입력하세요: ");
+			System.out.print("강의 평점을 입력하세요: ");
 			double point = input.nextDouble();
 			input.nextLine(); // Handle newline character
 	
-			System.out.print("강의평을 입력하세요: ");
+			System.out.print("강의평 내용을 입력하세요: ");
 			String contents = input.nextLine();
 			contents = contents.replace("'", "''");
 	
