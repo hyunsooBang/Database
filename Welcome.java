@@ -7,10 +7,12 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+// 유저 클래스
 class User {
 	private String name;
 	private String number;
 
+	// 유저 생성
 	public User(String name, String number) {
 		this.name = name;
 		this.number = number;
@@ -46,8 +48,11 @@ public class Welcome {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 
-			//conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "1234");
-			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project","root", "tjdwns246246");
+			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "1234");
+			// conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project",
+			// "root", "tjdwns246246");
+			// jdbc:mysql://localhost:3306/create.sql 및 insert.sql로 테이블 생성한 database name",
+			// "root", "root비밀번호"
 			System.out.println("MySQL DB 연결 성공");
 
 			// SQL 연결
@@ -59,10 +64,10 @@ public class Welcome {
 			while (stuRs.next()) {
 				String id = stuRs.getString("id");
 				String name = stuRs.getString("name");
-				String depart = stuRs.getString("department");
+				// String depart = stuRs.getString("department");
 				// System.out.println(id + " , " + name + " , " + depart);
 
-				// id와 name을 리스트에 저장
+				// 데이터베이스에 저장된 student id와 name을 유저 리스트에 저장
 				userList.add(new User(name, id));
 			}
 
@@ -75,7 +80,6 @@ public class Welcome {
 			System.out.println("오류 코드: " + error.getErrorCode());
 			System.out.println("오류 메시지: " + error.getMessage());
 			error.printStackTrace(); // 스택 트레이스 출력
-			// 로그 파일 확인하는 코드 추가 가능
 		}
 
 		Scanner input = new Scanner(System.in);
@@ -89,6 +93,7 @@ public class Welcome {
 			String userNumber = input.nextLine();
 
 			// 사용자 검증
+			// 입력받은 유저 이름 및 학번이 유저리스트 내에 존재하는지 확인
 			for (User user : userList) {
 				if (user.getName().equals(userName) && user.getNumber().equals(userNumber)) {
 					validUser = true;
@@ -123,12 +128,15 @@ public class Welcome {
 				if (mUser != null) {
 					switch (n) {
 						case 1:
+							// 강의평 삽입 함수
 							insertEIE();
 							break;
 						case 2:
+							// 강의평 검색 함수
 							searchECE();
 							break;
 						case 3:
+							// 강의평 수정 함수
 							modifyECE();
 							break;
 						case 4:
@@ -136,8 +144,7 @@ public class Welcome {
 							deleteECE();
 							break;
 						case 5:
-							// System.out.println("현재 고객 정보 : ");
-							// System.out.println("이름 " + userName + " 연락처 " + userMobile);
+							// 유저 정보 출력 함수
 							menuGuestInfo(mUser.getName(), mUser.getNumber());
 							break;
 						case 6:
@@ -154,6 +161,7 @@ public class Welcome {
 
 	}
 
+	// 메뉴 설명 함수
 	public static void menuIntroduction() {
 		System.out.println("******************************");
 		System.out.println(" 1. 강의평가 입력하기 ");
@@ -165,11 +173,13 @@ public class Welcome {
 		System.out.println("******************************");
 	}
 
+	// 현재 유저 정보 출력하는 함수
 	public static void menuGuestInfo(String name, String mobile) {
 		System.out.println("현재 고객 정보 : ");
 		System.out.println("이름 " + mUser.getName() + "   학번 " + mUser.getNumber());
 	}
 
+	// 강의평가 검색하는 함수
 	public static void searchECE() {
 		System.out.println("1. 강의명 및 교수명으로 검색하기");
 		System.out.println("2. 강의내용으로 검색하기");
@@ -181,21 +191,22 @@ public class Welcome {
 
 		switch (searchOption) {
 			case 1:
-				searchCourse();
+				searchCourse(); // 강의명 및 교수명으로 검색 메서드 호출
 				break;
 			case 2:
-				searchContents();
+				searchContents(); // 강의내용으로 검색 메서드 호출
 				break;
 			case 3:
-				searchAverageRating();
+				searchAverageRating(); // 강의명 및 교수명으로 평균 강의평 검색 메서드 호출
 				break;
 			default:
 				System.out.println("유효하지 않은 옵션입니다.");
 		}
 	}
 
+	// 강의평 이름과 교수명으로 강의평 검색하는 함수
 	public static void searchCourse() {
-
+		// 검색할 강의명과 교수명을 입력 받음
 		Scanner input = new Scanner(System.in);
 		System.out.print("검색할 강의명을 입력하세요: ");
 		String courseName = input.nextLine();
@@ -204,7 +215,7 @@ public class Welcome {
 		System.out.println("----------------------------");
 
 		try {
-
+			// 임시로 뷰를 생성하여 검색 조건에 해당하는 데이터를 조회
 			String createViewSql = "CREATE VIEW V AS " +
 					"SELECT c.title, c.id AS course_id, p.name AS professor_name, r.student_id, r.contents, r.point " +
 					"FROM rating r " +
@@ -213,7 +224,7 @@ public class Welcome {
 					"WHERE c.title LIKE '%" + courseName + "%' AND p.name LIKE '%" + professorName + "%'";
 
 			stmt.executeUpdate(createViewSql);
-
+			// 뷰에서 데이터를 선택하여 출력
 			String selectSql = "SELECT * FROM V";
 			ResultSet result = stmt.executeQuery(selectSql);
 
@@ -235,7 +246,7 @@ public class Welcome {
 			}
 
 			result.close();
-
+			// 생성한 뷰 삭제
 			String dropViewSql = "DROP VIEW V";
 			stmt.executeUpdate(dropViewSql);
 		} catch (SQLException e) {
@@ -243,7 +254,9 @@ public class Welcome {
 		}
 	}
 
+	// 강의평 내용으로 강의평 검색하는 함수
 	public static void searchContents() {
+		// 검색할 강의 내용을 입력 받음
 		Scanner input = new Scanner(System.in);
 		System.out.print("강의내용을 입력하세요: ");
 		String courseContents = input.nextLine();
@@ -252,7 +265,9 @@ public class Welcome {
 			// 기존에 생성된 'V1' 뷰가 있으면 삭제
 			String dropViewSql = "DROP VIEW IF EXISTS V";
 			stmt.executeUpdate(dropViewSql);
-
+			// 임시로 뷰를 생성하여 검색 조건에 해당하는 데이터를 조회
+			// rating, course, professor 테이블을 조인하고, r.contents 필드에서 courseContents 변수에 포함된
+			// 내용을 포함하는 레코드를 선택하여 임시 뷰(V)를 생성
 			String sql = "CREATE VIEW V AS " +
 					"SELECT c.title, c.id AS course_id, p.name AS professor_name, r.contents, r.point, r.student_id " +
 					"FROM rating r " +
@@ -261,7 +276,7 @@ public class Welcome {
 					"WHERE r.contents LIKE '%" + courseContents + "%'";
 
 			stmt.executeUpdate(sql);
-
+			// 뷰에서 데이터를 선택하여 출력
 			sql = "SELECT * FROM V";
 			ResultSet result = stmt.executeQuery(sql);
 
@@ -284,7 +299,7 @@ public class Welcome {
 			}
 
 			result.close();
-
+			// 생성한 뷰 삭제
 			sql = "DROP VIEW V";
 			stmt.executeUpdate(sql);
 
@@ -293,6 +308,7 @@ public class Welcome {
 		}
 	}
 
+	// 특정 course의 평균 강의평점을 검색하는 함수
 	public static void searchAverageRating() {
 		Scanner input = new Scanner(System.in);
 
@@ -302,6 +318,7 @@ public class Welcome {
 		String professorName = input.nextLine();
 		System.out.println("----------------------------");
 
+		// rating, course, professor 테이블을 조인하고, 특정 교수 이름과 강의 제목에 해당하는 레코드들의 평균 평점을 조회
 		try {
 			String sql = "SELECT AVG(point) AS average_rating " +
 					"FROM rating r " +
@@ -327,13 +344,14 @@ public class Welcome {
 		}
 	}
 
+	// 자신이 작성한 강의평 수정하는 함수
 	public static void modifyECE() {
 		if (mUser != null) {
 			String studentId = mUser.getNumber();
 			String studentName = mUser.getName();
 
 			System.out.println("\n다음은 " + studentName + "님이 남기신 강의평 목록입니다.\n");
-
+			// studentId에 해당하는 학생의 강의평을 조회
 			try {
 				String selectSql = "SELECT r.rating_id, r.contents, r.point, c.title, p.name AS professor_name " +
 						"FROM rating r " +
@@ -343,8 +361,9 @@ public class Welcome {
 
 				ResultSet result = stmt.executeQuery(selectSql);
 
+				// 강의평가가 없는 경우를 대비해 불리언 변수 생성
 				boolean hasRating = false;
-
+				// 강의평가가 있는 경우 결과 출력
 				while (result.next()) {
 					hasRating = true;
 					int ratingId = result.getInt("rating_id");
@@ -360,7 +379,7 @@ public class Welcome {
 					System.out.println("강의평 내용: " + contents);
 					System.out.println("-----------------------------");
 				}
-
+				// 강의평가가 없는 경우
 				if (!hasRating) {
 					System.out.println("강의평가가 없습니다.");
 					return;
@@ -376,6 +395,7 @@ public class Welcome {
 				System.out.print("새로운 평점: ");
 				double newPoint = input.nextDouble();
 
+				// 강의평점은 1-5점만 입력 가능
 				if (newPoint < 1 || newPoint > 5) {
 					System.out.println("강의평점은 1점에서 5점 사이만 입력할 수 있습니다.");
 					return;
@@ -384,6 +404,7 @@ public class Welcome {
 				System.out.print("새로운 강의평 내용: ");
 				String newContents = input.next();
 
+				// 유저에게 입력받은 새로운 평점과 내용으로 강의평 업데이트
 				String updateSql = "UPDATE rating " +
 						"SET contents = '" + newContents + "', point = " + newPoint +
 						" WHERE rating_id = " + ratingId + " AND student_id = '" + studentId + "'";
@@ -404,9 +425,10 @@ public class Welcome {
 		}
 	}
 
+	// 새로운 강의평 추가 함수
 	public static void insertEIE() {
 		try {
-			// Display the course list
+			// 전체 강의목록 출력
 			System.out.println("<< 강의 목록 >>");
 			String sql = "SELECT c.id AS course_id, c.title AS course_title, p.name AS professor_name " +
 					"FROM course c " +
@@ -422,7 +444,7 @@ public class Welcome {
 
 			courseRs.close();
 
-			// Prompt for the course ID
+			// 강의 ID, 평점, 내용을 입력받기
 			Scanner input = new Scanner(System.in);
 			System.out.print("평가하고 싶은 강의 ID를 입력하세요: ");
 			String courseId = input.nextLine();
@@ -435,6 +457,7 @@ public class Welcome {
 			String contents = input.nextLine();
 			contents = contents.replace("'", "''");
 
+			// 유저 정보 기반으로 입력받은 강의 ID, 평점, 내용을 rating 테이블에 삽입
 			sql = "INSERT INTO rating (rating_id, course_id, prof_id, student_id, point, contents) " +
 					"SELECT MAX(rating_id) + 1, '" + courseId + "', c.prof_id, s.id, " + point + ", '" + contents + "' "
 					+
@@ -450,12 +473,13 @@ public class Welcome {
 		}
 	}
 
+	// 기존 강의평 삭제 함수
 	public static void deleteECE() {
 		if (mUser != null) {
 			String studentId = mUser.getNumber();
 			String studentName = mUser.getName();
 			try {
-				// Display the ratings for the current user
+				// 작성한 전체 강의평 보여주기
 				String selectSql = "SELECT r.rating_id, c.title AS course_title, p.name AS professor_name, r.point, r.contents "
 						+
 						"FROM rating r " +
@@ -489,18 +513,18 @@ public class Welcome {
 					return;
 				}
 
-				// Prompt for the rating ID to delete
+				// 삭제할 강의평 ID 입력받기
 				Scanner input = new Scanner(System.in);
 				System.out.print("삭제할 강의평 ID를 입력하세요: ");
 				int ratingId = input.nextInt();
 
-				// Check if the rating belongs to the current user
+				// 본인이 작성한 강의평인지 확인 과정
 				String checkSql = "SELECT * FROM rating " +
 						"WHERE rating_id = " + ratingId + " AND student_id = '" + studentId + "'";
 				ResultSet checkResult = stmt.executeQuery(checkSql);
 
 				if (checkResult.next()) {
-					// Delete the rating
+					// rating 테이블에서 강의평 삭제하기
 					String deleteSql = "DELETE FROM rating WHERE rating_id = " + ratingId;
 					stmt.executeUpdate(deleteSql);
 					System.out.println("강의평 삭제가 완료되었습니다.");
@@ -517,6 +541,7 @@ public class Welcome {
 		}
 	}
 
+	// 로그아웃 함수 - mySQL 해제
 	public static void menuExit() {
 		System.out.println("로그아웃 되었습니다.");
 		try {
