@@ -20,9 +20,7 @@ public class Welcome {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 
-			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "1234");
-			//conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project", "root", "tjdwns246246");
-
+			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "root12124");
 			System.out.println("MySQL DB 연결 성공");
 
 			// SQL 연결
@@ -32,7 +30,7 @@ public class Welcome {
 			stuRs = stmt.executeQuery(sql);
 
 			while (stuRs.next()) {
-				int id = stuRs.getInt("id");
+				String id = stuRs.getString("id");
 				String name = stuRs.getString("name");
 				String depart = stuRs.getString("department");
 				System.out.println(id + " ,  " + name + " , " + depart);
@@ -61,11 +59,11 @@ public class Welcome {
 			String userName = input.next();
 
 			System.out.print("학번을 입력하세요: ");
-			int userNumber = input.nextInt();
+			String userNumber = input.next();
 
 			// 사용자 검증
 			for (User user : userList) {
-				if (user.getName().equals(userName) && user.getNumber() == userNumber) {
+				if (user.getName().equals(userName) && user.getNumber().equals(userNumber)) {
 					validUser = true;
 					mUser = user;
 					break;
@@ -98,15 +96,13 @@ public class Welcome {
 				if (mUser != null) {
 					switch (n) {
 						case 1:
-							// 강의평 입력 함수
-							// ex) insertEIE();
+							insertEIE();
 							break;
 						case 2:
 							searchECE();
 							break;
 						case 3:
-							// 강의평 수정 함수
-							// ex) modifyEIE();
+							modifyECE();
 							break;
 						case 4:
 							// 강의평 삭제 함수
@@ -142,7 +138,7 @@ public class Welcome {
 		System.out.println("******************************");
 	}
 
-	public static void menuGuestInfo(String name, int mobile) {
+	public static void menuGuestInfo(String name, String mobile) {
 		System.out.println("현재 고객 정보 : ");
 		System.out.println("이름 " + mUser.getName() + "   학번 " + mUser.getNumber());
 	}
@@ -168,19 +164,198 @@ public class Welcome {
 	}
 
 	public static void searchName() {
-		// 강의명으로 데이터베이스에서 검색 수행
+		Scanner input = new Scanner(System.in);
+		System.out.print("강의명을 입력하세요: ");
+		String courseName = input.nextLine();
+		System.out.println("----------------------------");
+
+		try {
+			String createViewSql = "CREATE VIEW V AS " +
+					"SELECT c.title, c.id AS course_id, p.name AS professor_name, r.student_id, r.contents " +
+					"FROM rating r " +
+					"JOIN course c ON r.course_id = c.id " +
+					"JOIN professor p ON c.prof_id = p.id " +
+					"WHERE c.title LIKE '%" + courseName + "%'";
+
+			stmt.executeUpdate(createViewSql);
+
+			String selectSql = "SELECT * FROM V";
+			ResultSet result = stmt.executeQuery(selectSql);
+
+			while (result.next()) {
+				String title = result.getString("title");
+				String courseId = result.getString("course_id");
+				String professorName = result.getString("professor_name");
+				String studentId = result.getString("student_id");
+				String contents = result.getString("contents");
+				System.out.println("강의명: " + title);
+				System.out.println("강의 ID: " + courseId);
+				System.out.println("교수님 이름: " + professorName);
+				System.out.println("학생 ID: " + studentId);
+				System.out.println("강의평 내용: " + contents);
+				System.out.println("----------------------------");
+			}
+
+			result.close();
+
+			String dropViewSql = "DROP VIEW V";
+			stmt.executeUpdate(dropViewSql);
+		} catch (SQLException e) {
+			System.out.println("검색 중 오류 발생: " + e.getMessage());
+		}
 	}
 
 	public static void searchContents() {
 		Scanner input = new Scanner(System.in);
 		System.out.print("강의내용을 입력하세요: ");
 		String courseContents = input.nextLine();
+		System.out.println("----------------------------");
+		try {
+			String sql = "CREATE VIEW  V AS " +
+					"SELECT c.title, c.id, r.contents " +
+					"FROM rating r " +
+					"JOIN course c ON r.course_id = c.id " +
+					"WHERE r.contents LIKE '%" + courseContents + "%'";
 
-		// 강의내용으로 데이터베이스에서 검색 수행
-		// 결과를 출력하는 로직 추가
-		// 예: SELECT * FROM rating WHERE contents LIKE '%courseContents%';
+			stmt.executeUpdate(sql);
+
+			sql = "SELECT * FROM V";
+			ResultSet result = stmt.executeQuery(sql);
+
+			while (result.next()) {
+				String title = result.getString("title");
+				String id = result.getString("id");
+				String contents = result.getString("contents");
+				System.out.println("강의명: " + title);
+				System.out.println("강의 ID: " + id);
+				System.out.println("강의평 내용: " + contents);
+				System.out.println("----------------------------");
+			}
+
+			result.close();
+
+			sql = "DROP VIEW V";
+			stmt.executeUpdate(sql);
+
+		} catch (SQLException e) {
+			System.out.println("검색 중 오류 발생: " + e.getMessage());
+		}
 	}
 
+	public static void modifyECE() {
+		if (mUser != null) {
+			String studentId = mUser.getNumber();
+
+			try {
+				String selectSql = "SELECT r.rating_id, r.contents, r.point, c.title " +
+						"FROM rating r " +
+						"JOIN course c ON r.course_id = c.id " +
+						"WHERE r.student_id = '" + studentId + "'";
+
+				ResultSet result = stmt.executeQuery(selectSql);
+
+				boolean hasRating = false;
+
+				while (result.next()) {
+					hasRating = true;
+					int ratingId = result.getInt("rating_id");
+					String contents = result.getString("contents");
+					double point = result.getDouble("point");
+					String courseTitle = result.getString("title");
+
+					System.out.println("강의평 ID: " + ratingId);
+					System.out.println("강의평 내용: " + contents);
+					System.out.println("평점: " + point);
+					System.out.println("강의 제목: " + courseTitle);
+					System.out.println("-----------------------------");
+				}
+
+				if (!hasRating) {
+					System.out.println("강의평가가 없습니다.");
+					return;
+				}
+
+				System.out.println("강의평을 수정할 ID와 새로운 강의평 내용, 평점을 입력하세요.");
+
+				Scanner input = new Scanner(System.in);
+				System.out.print("강의평 ID: ");
+				int ratingId = input.nextInt();
+				input.nextLine(); // 개행 문자 제거
+
+				System.out.print("새로운 강의평 내용: ");
+				String newContents = input.nextLine();
+
+				System.out.print("새로운 평점: ");
+				double newPoint = input.nextDouble();
+
+				if (newPoint < 1 || newPoint > 5) {
+					System.out.println("강의평점은 1점에서 5점 사이만 입력할 수 있습니다.");
+					return;
+				}
+
+				String updateSql = "UPDATE rating " +
+						"SET contents = '" + newContents + "', point = " + newPoint +
+						" WHERE rating_id = " + ratingId + " AND student_id = '" + studentId + "'";
+
+				int rowsAffected = stmt.executeUpdate(updateSql);
+
+				if (rowsAffected > 0) {
+					System.out.println("강의평 수정이 완료되었습니다.");
+				} else {
+					System.out.println("일치하는 강의평 ID가 없습니다.");
+				}
+
+			} catch (SQLException e) {
+				System.out.println("강의평 수정 중 오류 발생: " + e.getMessage());
+			}
+		} else {
+			System.out.println("유저가 존재하지 않습니다.");
+		}
+	}
+
+	public static void insertEIE() {
+	    try {
+	        // course 테이블 출력
+	        System.out.println("<< 강의 목록 >>");
+	        String sql = "SELECT * FROM course";
+	        ResultSet courseRs = stmt.executeQuery(sql);
+
+	        while (courseRs.next()) {
+	            String courseId = courseRs.getString("id");
+	            String courseTitle = courseRs.getString("title");
+	            String professor = courseRs.getString("prof_id");
+	            System.out.println("강의 ID: " + courseId + ", 강의명: " + courseTitle + ", 교수: " + professor);
+	        }
+
+	        courseRs.close();
+
+	        // 강의 ID 입력
+	        Scanner input = new Scanner(System.in);
+	        System.out.print("평가하고 싶은 강의 ID를 입력하세요: ");
+	        String courseId = input.nextLine();
+
+	        System.out.print("강의 평가 점수를 입력하세요: ");
+	        double point = input.nextDouble();
+	        input.nextLine(); // 개행 문자 처리
+
+	        System.out.print("강의평을 입력하세요: ");
+	        String contents = input.nextLine();
+	        contents = contents.replace("'", "''");
+
+	        sql = "INSERT INTO rating (rating_id, course_id, prof_id, student_id, point, contents) " +
+	              "SELECT MAX(rating_id) + 1, '" + courseId + "', c.prof_id, s.id, " + point + ", '" + contents + "' " +
+	              "FROM course c, student s, rating r " +
+	              "WHERE s.name = '" + mUser.getName() + "' AND s.id = " + mUser.getNumber() +
+	              " AND c.id = '" + courseId + "'";
+	        stmt.executeUpdate(sql);
+
+	        System.out.println("강의평이 성공적으로 추가되었습니다.");
+
+	    } catch (SQLException e) {
+	        System.out.println("강의평 추가 중 오류 발생: " + e.getMessage());
+	    }
+	}
+	
 	public static void menuExit() {
 		System.out.println("로그아웃 되었습니다.");
 		try {
