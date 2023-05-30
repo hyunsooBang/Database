@@ -46,9 +46,8 @@ public class Welcome {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 
-			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "1234");
-			// conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project",
-			// "root", "tjdwns246246");
+			//conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "1234");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project","root", "tjdwns246246");
 			System.out.println("MySQL DB 연결 성공");
 
 			// SQL 연결
@@ -84,10 +83,10 @@ public class Welcome {
 
 		while (!validUser) {
 			System.out.print("이름을 입력하세요: ");
-			String userName = input.next();
+			String userName = input.nextLine();
 
 			System.out.print("학번을 입력하세요: ");
-			String userNumber = input.next();
+			String userNumber = input.nextLine();
 
 			// 사용자 검증
 			for (User user : userList) {
