@@ -20,8 +20,8 @@ public class Welcome {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 
-			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "root12124");
-			//conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project", "root", "tjdwns246246");
+			//conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "root12124");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project", "root", "tjdwns246246");
 			System.out.println("MySQL DB 연결 성공");
 
 			// SQL 연결
@@ -107,7 +107,7 @@ public class Welcome {
 							break;
 						case 4:
 							// 강의평 삭제 함수
-							// ex) deleteEIE();
+							deleteECE();
 							break;
 						case 5:
 							// System.out.println("현재 고객 정보 : ");
@@ -147,6 +147,7 @@ public class Welcome {
 	public static void searchECE() {
 		System.out.println("1. 강의명으로 검색하기");
 		System.out.println("2. 강의내용으로 검색하기");
+		System.out.println("3. 교수명 및 과목명으로 평균 강의평 검색하기");
 
 		Scanner input = new Scanner(System.in);
 		System.out.print("검색할 번호를 입력하세요: ");
@@ -158,6 +159,9 @@ public class Welcome {
 				break;
 			case 2:
 				searchContents();
+				break;
+			case 3:
+				searchAverageRating();
 				break;
 			default:
 				System.out.println("유효하지 않은 옵션입니다.");
@@ -243,9 +247,43 @@ public class Welcome {
 		}
 	}
 
+	public static void searchAverageRating() {
+		Scanner input = new Scanner(System.in);
+		System.out.print("교수명을 입력하세요: ");
+		String professorName = input.nextLine();
+		System.out.print("과목명을 입력하세요: ");
+		String courseTitle = input.nextLine();
+		System.out.println("----------------------------");
+	
+		try {
+			String sql = "SELECT AVG(point) AS average_rating " +
+						 "FROM rating r " +
+						 "JOIN course c ON r.course_id = c.id " +
+						 "JOIN professor p ON c.prof_id = p.id " +
+						 "WHERE p.name = '" + professorName + "' AND c.title = '" + courseTitle + "'";
+	
+			ResultSet result = stmt.executeQuery(sql);
+	
+			if (result.next()) {
+				double averageRating = result.getDouble("average_rating");
+				System.out.println("교수명: " + professorName);
+				System.out.println("과목명: " + courseTitle);
+				System.out.println("평균 강의평: " + averageRating);
+			} else {
+				System.out.println("일치하는 강의평이 없습니다.");
+			}
+	
+			result.close();
+	
+		} catch (SQLException e) {
+			System.out.println("검색 중 오류 발생: " + e.getMessage());
+		}
+	}
+	
 	public static void modifyECE() {
 		if (mUser != null) {
 			String studentId = mUser.getNumber();
+			
 
 			try {
 				String selectSql = "SELECT r.rating_id, r.contents, r.point, c.title " +
@@ -357,6 +395,72 @@ public class Welcome {
 	    }
 	}
 	
+	public static void deleteECE() {
+		if (mUser != null) {
+			String studentId = mUser.getNumber();
+			String studentName = mUser.getName();
+			try {
+				// Display the ratings for the current user
+				String selectSql = "SELECT rating_id, course_id, point, contents " +
+						"FROM rating " +
+						"WHERE student_id = '" + studentId + "'";
+				
+	
+				ResultSet result = stmt.executeQuery(selectSql);
+				
+				System.out.println("다음은 "+ studentName + "님이 남기신 강의평 목록입니다.\n");
+				boolean hasRating = false;
+	
+				while (result.next()) {
+					hasRating = true;
+					int ratingId = result.getInt("rating_id");
+					String courseId = result.getString("course_id");
+					double point = result.getDouble("point");
+					String contents = result.getString("contents");
+	
+					System.out.println("강의평 ID: " + ratingId);
+					System.out.println("강의 ID: " + courseId);
+					System.out.println("평점: " + point);
+					System.out.println("강의평 내용: " + contents);
+					System.out.println("-----------------------------");
+				}
+	
+				if (!hasRating) {
+					System.out.println("강의평가가 없습니다.");
+					return;
+				}
+	
+				// Prompt for the rating ID to delete
+				Scanner input = new Scanner(System.in);
+				System.out.print("삭제할 강의평 ID를 입력하세요: ");
+				int ratingId = input.nextInt();
+	
+				// Check if the rating belongs to the current user
+				String checkSql = "SELECT * FROM rating " +
+						"WHERE rating_id = " + ratingId + " AND student_id = '" + studentId + "'";
+				ResultSet checkResult = stmt.executeQuery(checkSql);
+	
+				if (checkResult.next()) {
+					// Delete the rating
+					String deleteSql = "DELETE FROM rating WHERE rating_id = " + ratingId;
+					stmt.executeUpdate(deleteSql);
+					System.out.println("강의평 삭제가 완료되었습니다.");
+				} else {
+					System.out.println("일치하는 강의평 ID가 없거나 권한이 없습니다.");
+				}
+	
+				checkResult.close();
+			} catch (SQLException e) {
+				System.out.println("강의평 삭제 중 오류 발생: " + e.getMessage());
+			}
+		} else {
+			System.out.println("유저가 존재하지 않습니다.");
+		}
+	}
+	
+
+
+
 	public static void menuExit() {
 		System.out.println("로그아웃 되었습니다.");
 		try {
