@@ -20,8 +20,6 @@ This Java program interacts with a MySQL database to perform various operations 
 3. **Name:** 이서연
    - **Student ID:** 2176255
 
-
-
 ## Prerequisites
 
 - Java Development Kit (JDK) installed
@@ -33,6 +31,8 @@ This Java program interacts with a MySQL database to perform various operations 
 1. Clone the repository or download the source code files.
 2. Open the project in your preferred Java development environment.
 3. Include the JDBC driver for MySQL in the project's classpath.
+4. modify Welcome.java 51 line to "jdbc:mysql://localhost:3306/database name", "root", "root비밀번호" 
+* When you do not modify welcome.java (number.4) , you can not connect MySQL DB. *
 
 To run the JAR file, you can use either of the following methods:
 
