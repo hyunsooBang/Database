@@ -47,10 +47,9 @@ public class Welcome {
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 
-			// MySQL 데이터베이스에 연결
-
-			//conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "1234");
-			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project","root", "tjdwns246246");
+			// MySQL 데이터베이스에 연결 (본인의 mysql 비밀번호 입력)
+			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "root12124");
+			// conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project","root", "tjdwns246246");
 			
 			
 			System.out.println("MySQL DB 연결 성공");
@@ -228,7 +227,7 @@ public class Welcome {
 			
 			stmt.executeUpdate(createViewSql);
 			
-			// Retrieve data from the V view
+			// 생성된 view와 professor 테이블을 조인하여 데이터 출력
 			String selectSql = "SELECT v.title, v.course_id, p.name AS professor_name, v.student_id, v.contents, v.point " +
 				"FROM V v " +
 				"JOIN professor p ON v.prof_id = p.id " +
@@ -277,8 +276,6 @@ public class Welcome {
 			stmt.executeUpdate(dropViewSql);
 
 			// 임시로 뷰를 생성하여 검색 조건에 해당하는 데이터를 조회
-			
-			
 			String sql = "CREATE VIEW V AS " +
 				"SELECT c.title, c.id AS course_id, r.contents, r.point, r.student_id, c.prof_id " +
 				"FROM rating r " +
@@ -287,7 +284,7 @@ public class Welcome {
 			
 			stmt.executeUpdate(sql);
 			
-			// Retrieve data from the V view and join with professor table
+			// 생성된 view와 professor 테이블을 조인하여 원하는 결과 출력
 			sql = "SELECT v.title, v.course_id, p.name AS professor_name, v.contents, v.point, v.student_id " +
 				"FROM V v " +
 				"JOIN professor p ON v.prof_id = p.id";
