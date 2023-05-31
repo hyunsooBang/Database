@@ -215,21 +215,29 @@ public class Welcome {
 		System.out.println("----------------------------");
 
 		try {
+
+			String dropViewSql = "DROP VIEW IF EXISTS V";
+			stmt.executeUpdate(dropViewSql);
+			
 			// 임시로 뷰를 생성하여 검색 조건에 해당하는 데이터를 조회
 			String createViewSql = "CREATE VIEW V AS " +
-					"SELECT c.title, c.id AS course_id, p.name AS professor_name, r.student_id, r.contents, r.point " +
-					"FROM rating r " +
-					"JOIN course c ON r.course_id = c.id " +
-					"JOIN professor p ON c.prof_id = p.id " +
-					"WHERE c.title LIKE '%" + courseName + "%' AND p.name LIKE '%" + professorName + "%'";
-
+				"SELECT c.title, c.id AS course_id, r.student_id, r.contents, r.point, c.prof_id " +
+				"FROM rating r " +
+				"JOIN course c ON r.course_id = c.id " +
+				"WHERE c.title LIKE '%" + courseName + "%'";
+			
 			stmt.executeUpdate(createViewSql);
 			
-			// 뷰에서 데이터를 선택하여 출력
-			String selectSql = "SELECT * FROM V";
+			// Retrieve data from the V view
+			String selectSql = "SELECT v.title, v.course_id, p.name AS professor_name, v.student_id, v.contents, v.point " +
+				"FROM V v " +
+				"JOIN professor p ON v.prof_id = p.id " +
+				"WHERE p.name LIKE '%" + professorName + "%'";
+			
 			ResultSet result = stmt.executeQuery(selectSql);
-
-			while (result.next()) {
+			
+			
+				while (result.next()) {
 				String title = result.getString("title");
 				String courseId = result.getString("course_id");
 				professorName = result.getString("professor_name");
@@ -248,7 +256,7 @@ public class Welcome {
 
 			result.close();
 			// 생성한 뷰 삭제
-			String dropViewSql = "DROP VIEW V";
+			dropViewSql = "DROP VIEW V";
 			stmt.executeUpdate(dropViewSql);
 		} catch (SQLException e) {
 			System.out.println("검색 중 오류 발생: " + e.getMessage());
@@ -269,20 +277,24 @@ public class Welcome {
 			stmt.executeUpdate(dropViewSql);
 
 			// 임시로 뷰를 생성하여 검색 조건에 해당하는 데이터를 조회
-			// rating, course, professor 테이블을 조인하고, r.contents 필드에서 courseContents 변수에 포함된
-			// 내용을 포함하는 레코드를 선택하여 임시 뷰(V)를 생성
+			
 			
 			String sql = "CREATE VIEW V AS " +
-					"SELECT c.title, c.id AS course_id, p.name AS professor_name, r.contents, r.point, r.student_id " +
-					"FROM rating r " +
-					"JOIN course c ON r.course_id = c.id " +
-					"JOIN professor p ON c.prof_id = p.id " +
-					"WHERE r.contents LIKE '%" + courseContents + "%'";
-
+				"SELECT c.title, c.id AS course_id, r.contents, r.point, r.student_id, c.prof_id " +
+				"FROM rating r " +
+				"JOIN course c ON r.course_id = c.id " +
+				"WHERE r.contents LIKE '%" + courseContents + "%'";
+			
 			stmt.executeUpdate(sql);
-			// 뷰에서 데이터를 선택하여 출력
-			sql = "SELECT * FROM V";
+			
+			// Retrieve data from the V view and join with professor table
+			sql = "SELECT v.title, v.course_id, p.name AS professor_name, v.contents, v.point, v.student_id " +
+				"FROM V v " +
+				"JOIN professor p ON v.prof_id = p.id";
+			
+
 			ResultSet result = stmt.executeQuery(sql);
+			
 
 			while (result.next()) {
 				String title = result.getString("title");
