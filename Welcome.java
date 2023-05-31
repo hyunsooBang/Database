@@ -260,6 +260,7 @@ public static void searchECE() {
 		// 생성한 뷰 삭제
 		dropViewSql = "DROP VIEW V";
 		stmt.executeUpdate(dropViewSql);
+		
 	} catch (SQLException e) {
 		System.out.println("검색 중 오류 발생: " + e.getMessage());
 	}
@@ -447,9 +448,9 @@ if (mUser != null) {
 	} catch (SQLException e) {
 		System.out.println("강의평 수정 중 오류 발생: " + e.getMessage());
 	}
-} else {
-	System.out.println("유저가 존재하지 않습니다.");
-}
+	} else {
+		System.out.println("유저가 존재하지 않습니다.");
+	}
 }
 // 새로운 강의평 추가 함수
 public static void insertECE() {
