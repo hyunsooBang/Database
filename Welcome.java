@@ -266,64 +266,61 @@ public static void searchECE() {
 	}
 }
 
-// 강의평 내용으로 강의평 검색하는 함수
 public static void searchContents() {
-	// 검색할 강의 내용을 입력 받음
-	Scanner input = new Scanner(System.in);
-	System.out.print("강의내용을 입력하세요: ");
-	String courseContents = input.nextLine();
-	System.out.println("----------------------------");
-	try {
+    // 검색할 강의 내용을 입력 받음
+    Scanner input = new Scanner(System.in);
+    System.out.print("강의내용을 입력하세요: ");
+    String courseContents = input.nextLine();
+    System.out.println("----------------------------");
+    try {
+        // 기존에 생성된 'V' 뷰가 있으면 삭제
+        String dropViewSql = "DROP VIEW IF EXISTS V";
+        stmt.executeUpdate(dropViewSql);
 
-		// 기존에 생성된 'V' 뷰가 있으면 삭제
-		String dropViewSql = "DROP VIEW IF EXISTS V";
-		stmt.executeUpdate(dropViewSql);
+        // 임시로 뷰를 생성하여 검색 조건에 해당하는 데이터를 조회
+        String createViewSql = "CREATE VIEW V AS " +
+                "SELECT c.title, c.id AS course_id, r.contents, r.point, r.student_id, c.prof_id " +
+                "FROM rating r " +
+                "JOIN course c ON r.course_id = c.id " +
+                "WHERE r.contents LIKE ?";
+        PreparedStatement createViewStmt = conn.prepareStatement(createViewSql);
+        createViewStmt.setString(1, "%" + courseContents + "%");
+        createViewStmt.executeUpdate();
 
-		// 임시로 뷰를 생성하여 검색 조건에 해당하는 데이터를 조회
-		String sql = "CREATE VIEW V AS " +
-			"SELECT c.title, c.id AS course_id, r.contents, r.point, r.student_id, c.prof_id " +
-			"FROM rating r " +
-			"JOIN course c ON r.course_id = c.id " +
-			"WHERE r.contents LIKE '%" + courseContents + "%'";
-		
-		stmt.executeUpdate(sql);
-		
-		// 생성된 view와 professor 테이블을 조인하여 원하는 결과 출력
-		sql = "SELECT v.title, v.course_id, p.name AS professor_name, v.contents, v.point, v.student_id " +
-			"FROM V v " +
-			"JOIN professor p ON v.prof_id = p.id";
-		
+        // 생성된 view와 professor 테이블을 조인하여 원하는 결과 출력
+        String selectSql = "SELECT v.title, v.course_id, p.name AS professor_name, v.contents, v.point, v.student_id " +
+                "FROM V v " +
+                "JOIN professor p ON v.prof_id = p.id";
+        PreparedStatement selectStmt = conn.prepareStatement(selectSql);
+        ResultSet result = selectStmt.executeQuery();
 
-		ResultSet result = stmt.executeQuery(sql);
-		
+        while (result.next()) {
+            String title = result.getString("title");
+            String courseId = result.getString("course_id");
+            String professorName = result.getString("professor_name");
+            String contents = result.getString("contents");
+            String studentId = result.getString("student_id");
+            double ratingPoint = result.getDouble("point");
 
-		while (result.next()) {
-			String title = result.getString("title");
-			String courseId = result.getString("course_id");
-			String professorName = result.getString("professor_name");
-			String contents = result.getString("contents");
-			String studentId = result.getString("student_id");
-			double ratingPoint = result.getDouble("point");
+            System.out.println("강의 ID: " + courseId);
+            System.out.println("강의명: " + title);
+            System.out.println("교수 이름: " + professorName);
+            System.out.println("학생 ID: " + studentId);
+            System.out.println("평점: " + ratingPoint);
+            System.out.println("강의평 내용: " + contents);
+            System.out.println("----------------------------");
+        }
 
-			System.out.println("강의 ID: " + courseId);
-			System.out.println("강의명: " + title);
-			System.out.println("교수 이름: " + professorName);
+        result.close();
+        // 생성한 뷰 삭제
+        String dropViewSql2 = "DROP VIEW V";
+        stmt.executeUpdate(dropViewSql2);
 
-			System.out.println("학생 ID: " + studentId);
-			System.out.println("평점: " + ratingPoint);
-			System.out.println("강의평 내용: " + contents);
-			System.out.println("----------------------------");
-		}
-
-		result.close();
-		// 생성한 뷰 삭제
-		sql = "DROP VIEW V";
-		stmt.executeUpdate(sql);
-
-	} catch (SQLException e) {
-		System.out.println("검색 중 오류 발생: " + e.getMessage());
-	}
+    } catch (SQLException e) {
+        System.out.println("검색 중 오류 발생: " + e.getMessage());
+    }
 }
+
 // 특정 course의 평균 강의평점을 검색하는 함수
 public static void searchAverageRating() {
 	Scanner input = new Scanner(System.in);
