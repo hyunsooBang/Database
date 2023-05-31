@@ -48,8 +48,8 @@ public class Welcome {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 
 			// MySQL 데이터베이스에 연결 (본인의 mysql 비밀번호 입력)
-			conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "root12124");
-			// conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project","root", "tjdwns246246");
+			//conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/project", "root", "root12124");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/project","root", "tjdwns246246");
 			
 			
 			System.out.println("MySQL DB 연결 성공");
